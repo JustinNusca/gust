@@ -1,0 +1,44 @@
+{
+  "name": "gust",
+  "version": "1.0.0",
+  "description": "A CLI tool to generate Tailwind V4 theme files from Figma design tokens.",
+  "main": "dist/index.js",
+  "bin": {
+    "gust": "./bin/run"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "format": "pnpm exec prettier . --check",
+    "format:fix": "pnpm exec prettier . --write -l",
+    "lint": "pnpm exec eslint .",
+    "lint:fix": "pnpm exec eslint . --fix",
+    "start": "node dist/index.js"
+  },
+  "keywords": [
+    "cli",
+    "design-tokens",
+    "figma",
+    "react",
+    "tailwind"
+  ],
+  "author": "Justin",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "inquirer": "^9.3.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@types/inquirer": "^9.0.8",
+    "@types/node": "^20.19.8",
+    "chalk": "^5.4.1",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0",
+    "prettier": "3.6.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.37.0"
+  },
+  "packageManager": "pnpm@10.12.4+sha256.cadfd9e6c9fcc2cb76fe7c0779a5250b632898aea5f53d833a73690c77a778d9"
+}
