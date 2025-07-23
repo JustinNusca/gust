@@ -10,10 +10,13 @@ import {
   generateShadowCss,
   generateGridCss,
   generateTypographyCss,
+  fetchDocument,
+  FetchedTokens,
 } from "./actions";
 import {
   componentOutputDirPrompt,
   createTextPrompt,
+  documentIDPrompt,
   errorPrompt,
   inputDirPrompt,
   outputDirPrompt,
@@ -31,6 +34,7 @@ program
     "-co --component-output [componentOutputDir]",
     "Path for the generated component",
   )
+  .option("-key, --key [key]", "Figma document ID")
   .option("-o, --output [outputDir]", "Path for the CSS output directory")
   .option(
     "-t, --create-text [boolean]",
@@ -42,6 +46,13 @@ program
       let createComponent = options.createText;
       let inputDir = inputDirArg;
       let outputDir = options.output;
+      let documentId = options.key;
+      let fetchedTokens: FetchedTokens = { font: {}, palette: {} };
+
+      if (!documentId) {
+        const answers = await documentIDPrompt();
+        documentId = answers.documentID;
+      }
 
       if (!inputDir) {
         const answers = await inputDirPrompt();
@@ -68,6 +79,10 @@ program
       const stylesDir = join(resolvedOutputDir, "styles");
       const tokens = JSON.parse(readFileSync(inputPath, "utf-8"));
 
+      if (documentId) {
+        fetchedTokens = await fetchDocument(documentId);
+      }
+
       if (!existsSync(inputPath)) {
         errorPrompt(`Input file not found at ${inputPath}`);
         process.exit(1);
@@ -81,13 +96,19 @@ program
         mkdirSync(stylesDir, { recursive: true });
       }
 
-      writeFileSync(join(stylesDir, "font.css"), generateFontCss(tokens));
-      writeFileSync(join(stylesDir, "palette.css"), generatePaletteCss(tokens));
+      writeFileSync(
+        join(stylesDir, "font.css"),
+        generateFontCss(fetchedTokens.font),
+      );
+      writeFileSync(
+        join(stylesDir, "palette.css"),
+        generatePaletteCss(fetchedTokens.palette),
+      );
       writeFileSync(join(stylesDir, "shadows.css"), generateShadowCss(tokens));
       writeFileSync(join(stylesDir, "spacing.css"), generateGridCss(tokens));
       writeFileSync(
         join(stylesDir, "typography.css"),
-        generateTypographyCss(tokens),
+        generateTypographyCss(fetchedTokens.font),
       );
       writeFileSync(
         join(resolvedOutputDir, "globals.css"),
@@ -100,7 +121,10 @@ program
         const fullComponentPath = resolve(componentOutputDir, "Text/index.tsx");
 
         mkdirSync(dirname(fullComponentPath), { recursive: true });
-        writeFileSync(fullComponentPath, generateTextComponent(tokens));
+        writeFileSync(
+          fullComponentPath,
+          generateTextComponent(fetchedTokens.font),
+        );
 
         successTextPrompt(fullComponentPath);
       }

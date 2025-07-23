@@ -1,20 +1,15 @@
-import { FontToken, Tokens } from "../types";
-import { flattenTokens, pxToRem, sanitizeName } from "../util";
+import { FontToken } from "../types";
+import { pxToRem, sanitizeName } from "../util";
 
-export function generateFontCss(tokens: Tokens): string {
-  const fontTokens = flattenTokens(tokens.font || {}) as Record<
-    string,
-    FontToken
-  >;
-
+export function generateFontCss(tokens: Record<string, FontToken>): string {
   // Create list of font faces that are unique by family and weight.
   // TODO: Handle unique files for font styles (eg. italic, bold) — these are
   // generally not defined as unique tokens in Figma, but are needed for proper
   // font rendering of these different styles.
   const fontFaces = new Set<string>();
 
-  Object.keys(fontTokens).forEach((key) => {
-    const value = fontTokens[key].value;
+  Object.keys(tokens).forEach((key) => {
+    const value = tokens[key].value;
     fontFaces.add(`${value.fontFamily}|${value.fontWeight}`);
   });
 
@@ -39,33 +34,40 @@ export function generateFontCss(tokens: Tokens): string {
     .join("");
 }
 
-export function generateTypographyCss(tokens: Tokens): string {
-  const fontTokens = flattenTokens(tokens.font || {}) as Record<
-    string,
-    FontToken
-  >;
-
+export function generateTypographyCss(
+  tokens: Record<string, FontToken>,
+): string {
   // Create list of CSS variables for each variant's style properties.
   const themeVariables = new Map<string, string>();
-  const fontTokenKeys = Object.keys(fontTokens);
+  const fontTokenKeys = Object.keys(tokens).sort();
 
-  Object.keys(fontTokens).forEach((key) => {
-    const { value } = fontTokens[key];
+  Object.keys(tokens).forEach((key) => {
+    const { value } = tokens[key];
     const sanitizedKey = sanitizeName(key);
+    const parsedLineHeight =
+      (value.lineHeightPercentFontSize || 100) / 100 || 1;
 
     themeVariables.set(
-      `--font-${sanitizeName(value.fontFamily)}`,
+      `--font-${sanitizeName(value.fontFamily || "unknown")}`,
       `"${value.fontFamily}"`,
     );
     themeVariables.set(
       `--font-weight-${value.fontWeight}`,
-      value.fontWeight.toString(),
+      value.fontWeight?.toString() || "400",
     );
-    themeVariables.set(`--leading-${sanitizedKey}`, pxToRem(value.lineHeight));
-    themeVariables.set(`--text-size-${sanitizedKey}`, pxToRem(value.fontSize));
+    themeVariables.set(
+      `--leading-${sanitizedKey}`,
+      Number.isInteger(parsedLineHeight)
+        ? `${parsedLineHeight}`
+        : parsedLineHeight.toFixed(2),
+    );
+    themeVariables.set(
+      `--text-size-${sanitizedKey}`,
+      pxToRem(value.fontSize || 16),
+    );
     themeVariables.set(
       `--tracking-${sanitizedKey}`,
-      pxToRem(value.letterSpacing),
+      pxToRem(value.letterSpacing || "normal"),
     );
   });
 
@@ -83,17 +85,17 @@ export function generateTypographyCss(tokens: Tokens): string {
   const utilityClasses = fontTokenKeys
     .map((key, i) => {
       const isLast = i === fontTokenKeys.length - 1;
-      const { value } = fontTokens[key];
+      const { value } = tokens[key];
 
       const sanitizedKey = sanitizeName(key);
       const utilityName = `font-${sanitizedKey}`;
       const applyClasses = [
-        `font-${sanitizeName(value.fontFamily)}`,
+        `font-${sanitizeName(value.fontFamily || "unknown")}`,
         `font-weight-${value.fontWeight}`,
         `leading-${sanitizedKey}`,
         `text-size-${sanitizedKey}`,
         `tracking-${sanitizedKey}`,
-        value.textCase === "uppercase" ? "uppercase" : undefined,
+        value.textCase === "UPPER" ? "uppercase" : undefined,
       ]
         .filter(Boolean)
         .join(" ");

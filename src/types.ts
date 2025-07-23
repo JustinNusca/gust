@@ -1,3 +1,5 @@
+import { TypeStyle } from "@figma/rest-api-spec";
+
 export interface EffectToken {
   type: "custom-shadow";
   value: {
@@ -11,25 +13,17 @@ export interface EffectToken {
 }
 
 export interface PaletteToken {
-  description?: string;
-  type: "color";
+  id: string;
+  name: string;
+  type: "COLOR" | "color";
   value: string;
-  blendMode: string;
 }
 
 export interface FontToken {
-  type: "custom-fontStyle";
-  value: {
-    fontFamily: string;
-    fontSize: number;
-    fontStretch?: string;
-    fontStyle: string;
-    fontWeight: number;
-    letterSpacing: number;
-    lineHeight: number;
-    textCase: string;
-    textDecoration?: string;
-  };
+  id: string;
+  name: string;
+  type: "TEXT";
+  value: TypeStyle;
 }
 
 export interface GradientStop {

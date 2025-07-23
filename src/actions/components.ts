@@ -1,9 +1,8 @@
 import { Tokens } from "../types";
-import { flattenTokens, sanitizeName } from "../util";
+import { sanitizeName } from "../util";
 
 export function generateTextComponent(tokens: Tokens): string {
-  const flattenedStyles = flattenTokens(tokens.font || {});
-  const variants = Object.keys(flattenedStyles).map(sanitizeName).sort();
+  const variants = Object.keys(tokens).map(sanitizeName).sort();
   const fallbackVariant = variants[0];
   const textVariantType = `type TextVariant =\n  | "${variants.join('"\n  | "')}";`;
   const getClassNameForVariantCases = variants

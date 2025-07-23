@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.31.0",
+    "@figma/rest-api-spec": "^0.33.0",
     "@types/inquirer": "^9.0.8",
     "@types/node": "^20.19.8",
     "chalk": "^5.4.1",
@@ -40,5 +41,5 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.37.0"
   },
-  "packageManager": "pnpm@10.12.4+sha256.cadfd9e6c9fcc2cb76fe7c0779a5250b632898aea5f53d833a73690c77a778d9"
+  "packageManager": "pnpm@10.13.1"
 }
